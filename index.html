@@ -8,9 +8,73 @@
     <link href="css/mui.min.css" rel="stylesheet"/>
     <script type="text/javascript" charset="utf-8">
       	mui.init();
+      	mui.plusReady(function(){
+      		
+      		//===================沉浸式判断并设置=====================
+			var immersed = 0;
+			var topoffset = 44;
+			var ms=(/Html5Plus\/.+\s\(.*(Immersed\/(\d+\.?\d*).*)\)/gi).exec(navigator.userAgent);
+			if(ms && ms.length>=3){ // 当前环境为沉浸式状态栏模式
+				immersed = parseFloat(ms[2]);// 获取状态栏的高度
+				topoffset = topoffset + immersed;
+				var t = document.getElementsByTagName('header')[0];
+				if(t){
+					t.style.paddingTop = immersed+'px';
+					t.style.height= topoffset +'px';
+				}
+				var mc = document.getElementsByClassName('mui-content')[0];
+				if (mc) {
+					var newpt = 44 + immersed +'px';
+					mc.style.paddingTop = newpt;
+				}
+				//下拉刷新位置
+				var mptp = document.getElementsByClassName('mui-pull-top-pocket')[0];
+				if (mptp) {
+					mptp.style.top = immersed +'px';
+				}
+			}
+			
+			document.getElementById("t").innerText = plus.navigator.getStatusbarHeight();
+			//======================================================
+      		
+      		//读取本地存储，检查是否为首次启动
+			var showGuide = plus.storage.getItem("lauchFlag");
+			//仅支持竖屏显示
+			plus.screen.lockOrientation("portrait-primary");
+			if(showGuide) {
+				//有值，说明已经显示过了，无需显示；
+				//关闭splash页面；
+				plus.navigator.closeSplashscreen();
+				plus.navigator.setFullscreen(false);
+				//预加载
+//				preload();
+			} else {
+				//显示启动导航
+				mui.openWindow({
+					id: 'guide',
+					url: 'html/guide.html',
+					styles: {
+						popGesture: "none"
+					},
+					show: {
+						aniShow: 'none'
+					},
+					waiting: {
+						autoShow: false
+					}
+				});
+				//延迟的原因：优先打开启动导航页面，避免资源争夺
+				setTimeout(function() {
+					//预加载
+//					preload();
+				}, 200);
+			}
+      	});
     </script>
 </head>
 <body>
-	
+	<div>
+		<p id="t"></p>
+	</div>
 </body>
 </html>
